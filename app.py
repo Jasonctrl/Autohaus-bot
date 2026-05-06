@@ -101,7 +101,7 @@ st.markdown("""
 # 🚗 Audi KI Verkaufsassistent
 ### Premium Beratung für moderne Mobilität
 """)
-
+st.image("images/Cadi.jpg")
 # ==================================================
 # 🖼️ AUTO BILDER (FIXE LINKS)
 # ==================================================
