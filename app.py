@@ -1,5 +1,8 @@
 import streamlit as st
 import os
+import os
+st.write("Images Ordner Inhalt:")
+st.write(os.listdir("images"))
 import time
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -101,7 +104,7 @@ st.markdown("""
 # 🚗 Audi KI Verkaufsassistent
 ### Premium Beratung für moderne Mobilität
 """)
-st.image("images/Cadi.jpg")
+st.image("images/cadi.jpg")
 # ==================================================
 # 🖼️ AUTO BILDER (FIXE LINKS)
 # ==================================================
