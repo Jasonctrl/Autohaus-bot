@@ -154,7 +154,7 @@ with col1:
 
 with col2:
     st.image(
-        "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7",
+        "https://images.unsplash.com/photo-1767749995462-9fe0890d5960?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         use_container_width=True
     )
     st.markdown("### Audi Q8")
