@@ -21,24 +21,20 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* Gesamter Hintergrund */
 .stApp {
     background-color: #0e1117;
     color: white;
 }
 
-/* Sidebar */
 section[data-testid="stSidebar"] {
     background-color: #111827;
     border-right: 1px solid #222;
 }
 
-/* Titel */
 h1, h2, h3 {
     color: white;
 }
 
-/* Buttons */
 .stButton>button {
     background-color: #d90429;
     color: white;
@@ -54,7 +50,6 @@ h1, h2, h3 {
     transform: scale(1.02);
 }
 
-/* Chat Nachrichten */
 [data-testid="stChatMessage"] {
     background-color: #1f2937;
     border-radius: 15px;
@@ -62,14 +57,12 @@ h1, h2, h3 {
     margin-bottom: 10px;
 }
 
-/* Eingabefeld */
 .stChatInput input {
     background-color: #1f2937 !important;
     color: white !important;
     border-radius: 10px !important;
 }
 
-/* Info Box */
 [data-testid="stAlert"] {
     border-radius: 12px;
 }
@@ -88,10 +81,6 @@ api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
     st.error("❌ Kein API Key gefunden!")
     st.stop()
-
-# ==================================================
-# 🤖 GEMINI KONFIGURATION
-# ==================================================
 
 genai.configure(api_key=api_key)
 
@@ -125,13 +114,39 @@ st.markdown("""
 """)
 
 # ==================================================
+# 🖼️ AUDI BILDER GALERIE
+# ==================================================
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.image(
+        "https://source.unsplash.com/800x600/?audi,sportscar",
+        caption="Audi Sport",
+        use_container_width=True
+    )
+
+with col2:
+    st.image(
+        "https://source.unsplash.com/800x600/?luxury,car",
+        caption="Premium Fahrzeuge",
+        use_container_width=True
+    )
+
+with col3:
+    st.image(
+        "https://source.unsplash.com/800x600/?electric,car",
+        caption="E-Mobilität",
+        use_container_width=True
+    )
+
+# ==================================================
 # 💬 CHAT VERLAUF
 # ==================================================
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Nachrichten anzeigen
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
@@ -153,14 +168,12 @@ if prompt:
 
     current_time = time.time()
 
-    # Verhindert Spam-Anfragen
     if current_time - st.session_state.last_time < 5:
         st.warning("⏳ Bitte kurz warten...")
         st.stop()
 
     st.session_state.last_time = current_time
 
-    # User speichern
     st.session_state.messages.append({
         "role": "user",
         "content": prompt
@@ -169,47 +182,32 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # ==================================================
-    # 🤖 KI ANTWORT
-    # ==================================================
-
     with st.chat_message("assistant"):
 
         with st.spinner("🚗 Audi KI denkt nach..."):
 
             try:
-
-                response = model.generate_content(
-                    f"""
+                response = model.generate_content(f"""
 Du bist ein professioneller Audi Verkaufsberater.
-
-Dein Ziel:
-- Kunden beraten
-- Fahrzeuge empfehlen
-- Premium Service bieten
-- verkaufsorientiert antworten
 
 Regeln:
 - freundlich
 - modern
-- professionell
+- verkaufsorientiert
+- empfehle Audi Modelle
 - stelle Rückfragen
-- empfehle passende Audi Modelle
-- antworte klar und hilfreich
 
 Kunde:
 {prompt}
-"""
-                )
+""")
 
                 answer = response.text
 
             except Exception:
-                answer = "⏳ Zu viele Anfragen. Bitte kurz warten und erneut versuchen."
+                answer = "⏳ Fehler oder zu viele Anfragen. Bitte erneut versuchen."
 
         st.markdown(answer)
 
-    # Antwort speichern
     st.session_state.messages.append({
         "role": "assistant",
         "content": answer
