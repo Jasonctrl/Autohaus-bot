@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 
 # ==================================================
-# 🚗 AUDI KI VERKAUFSASSISTENT
+# 🚗 APP SETUP
 # ==================================================
 
 st.set_page_config(
@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 # ==================================================
-# 🎨 AUDI PREMIUM DESIGN
+# 🎨 DESIGN
 # ==================================================
 
 st.markdown("""
@@ -42,7 +42,6 @@ h1, h2, h3 {
     border: none;
     padding: 12px 20px;
     font-weight: bold;
-    transition: 0.3s;
 }
 
 .stButton>button:hover {
@@ -63,19 +62,14 @@ h1, h2, h3 {
     border-radius: 10px !important;
 }
 
-[data-testid="stAlert"] {
-    border-radius: 12px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
 # ==================================================
-# 🔐 API KEY LADEN
+# 🔐 API KEY
 # ==================================================
 
 load_dotenv()
-
 api_key = os.getenv("GOOGLE_API_KEY")
 
 if not api_key:
@@ -83,7 +77,6 @@ if not api_key:
     st.stop()
 
 genai.configure(api_key=api_key)
-
 model = genai.GenerativeModel("gemini-2.5-flash")
 
 # ==================================================
@@ -93,15 +86,12 @@ model = genai.GenerativeModel("gemini-2.5-flash")
 st.sidebar.title("🚘 Audi Dashboard")
 
 st.sidebar.info("""
-Willkommen beim digitalen Audi Verkaufsassistenten.
-
 ✔ KI Beratung  
-✔ Premium Fahrzeug-Empfehlungen  
-✔ Lead-Generierung  
-✔ Verkaufsunterstützung  
+✔ Premium Fahrzeuge  
+✔ Verkaufsassistent  
 """)
 
-st.sidebar.success("✅ System Online")
+st.sidebar.success("Online")
 
 # ==================================================
 # 🚗 TITEL
@@ -109,39 +99,38 @@ st.sidebar.success("✅ System Online")
 
 st.markdown("""
 # 🚗 Audi KI Verkaufsassistent
-
 ### Premium Beratung für moderne Mobilität
 """)
 
 # ==================================================
-# 🖼️ AUDI BILDER GALERIE
+# 🖼️ AUTO BILDER (FIXE LINKS)
 # ==================================================
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
     st.image(
-        "https://source.unsplash.com/800x600/?audi,sportscar",
-        caption="Audi Sport",
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70",
+        caption="Sportliches Fahrzeug",
         use_container_width=True
     )
 
 with col2:
     st.image(
-        "https://source.unsplash.com/800x600/?luxury,car",
-        caption="Premium Fahrzeuge",
+        "https://images.unsplash.com/photo-1549924231-f129b911e442",
+        caption="Premium Luxus Auto",
         use_container_width=True
     )
 
 with col3:
     st.image(
-        "https://source.unsplash.com/800x600/?electric,car",
-        caption="E-Mobilität",
+        "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+        caption="Elektro & Zukunft",
         use_container_width=True
     )
 
 # ==================================================
-# 💬 CHAT VERLAUF
+# 💬 CHAT SYSTEM
 # ==================================================
 
 if "messages" not in st.session_state:
@@ -151,46 +140,35 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# ==================================================
-# ⏳ ANTI SPAM SCHUTZ
-# ==================================================
-
 if "last_time" not in st.session_state:
     st.session_state.last_time = 0
 
 # ==================================================
-# 💬 USER INPUT
+# 💬 INPUT
 # ==================================================
 
 prompt = st.chat_input("Wie kann ich Ihnen helfen?")
 
 if prompt:
 
-    current_time = time.time()
-
-    if current_time - st.session_state.last_time < 5:
+    if time.time() - st.session_state.last_time < 5:
         st.warning("⏳ Bitte kurz warten...")
         st.stop()
 
-    st.session_state.last_time = current_time
+    st.session_state.last_time = time.time()
 
-    st.session_state.messages.append({
-        "role": "user",
-        "content": prompt
-    })
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-
         with st.spinner("🚗 Audi KI denkt nach..."):
 
             try:
                 response = model.generate_content(f"""
-Du bist ein professioneller Audi Verkaufsberater.
+Du bist ein Audi Verkaufsberater.
 
-Regeln:
 - freundlich
 - modern
 - verkaufsorientiert
@@ -200,15 +178,11 @@ Regeln:
 Kunde:
 {prompt}
 """)
-
                 answer = response.text
 
             except Exception:
-                answer = "⏳ Fehler oder zu viele Anfragen. Bitte erneut versuchen."
+                answer = "⏳ Fehler oder zu viele Anfragen."
 
         st.markdown(answer)
 
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": answer
-    })
+    st.session_state.messages.append({"role": "assistant", "content": answer})
