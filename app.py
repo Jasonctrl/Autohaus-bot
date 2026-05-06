@@ -21,7 +21,7 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* Gesamter Hintergrund */
+/* Hintergrund */
 .stApp {
     background-color: #0e1117;
     color: white;
@@ -33,7 +33,7 @@ section[data-testid="stSidebar"] {
     border-right: 1px solid #222;
 }
 
-/* Titel */
+/* Überschriften */
 h1, h2, h3 {
     color: white;
 }
@@ -62,7 +62,7 @@ h1, h2, h3 {
     margin-bottom: 10px;
 }
 
-/* Eingabefeld */
+/* Chat Input */
 .stChatInput input {
     background-color: #1f2937 !important;
     color: white !important;
@@ -125,26 +125,75 @@ st.markdown("""
 """)
 
 # ==================================================
+# 🚗 PREMIUM AUTO BILD
+# ==================================================
+
+st.image(
+    "https://images.unsplash.com/photo-1503376780353-7e6692767b70",
+    use_container_width=True
+)
+
+# ==================================================
+# 🚘 FAHRZEUGKARTEN
+# ==================================================
+
+st.subheader("🔥 Beliebte Premium Modelle")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.image(
+        "https://images.unsplash.com/photo-1553440569-bcc63803a83d",
+        use_container_width=True
+    )
+    st.markdown("### Audi RS6")
+    st.write("💰 Ab 129.000 €")
+    st.write("✔ 600 PS")
+    st.write("✔ Quattro")
+    st.button("Probefahrt RS6")
+
+with col2:
+    st.image(
+        "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7",
+        use_container_width=True
+    )
+    st.markdown("### Audi Q8")
+    st.write("💰 Ab 89.000 €")
+    st.write("✔ Luxus SUV")
+    st.write("✔ Hybrid Technologie")
+    st.button("Probefahrt Q8")
+
+with col3:
+    st.image(
+        "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+        use_container_width=True
+    )
+    st.markdown("### Audi A5")
+    st.write("💰 Ab 58.000 €")
+    st.write("✔ Sportlich")
+    st.write("✔ Premium Komfort")
+    st.button("Probefahrt A5")
+
+# ==================================================
 # 💬 CHAT VERLAUF
 # ==================================================
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Nachrichten anzeigen
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
 # ==================================================
-# ⏳ ANTI SPAM SCHUTZ
+# ⏳ ANTI SPAM
 # ==================================================
 
 if "last_time" not in st.session_state:
     st.session_state.last_time = 0
 
 # ==================================================
-# 💬 USER INPUT
+# 💬 CHAT INPUT
 # ==================================================
 
 prompt = st.chat_input("Wie kann ich Ihnen helfen?")
@@ -153,14 +202,14 @@ if prompt:
 
     current_time = time.time()
 
-    # Verhindert Spam-Anfragen
+    # Spam Schutz
     if current_time - st.session_state.last_time < 5:
         st.warning("⏳ Bitte kurz warten...")
         st.stop()
 
     st.session_state.last_time = current_time
 
-    # User speichern
+    # User Nachricht speichern
     st.session_state.messages.append({
         "role": "user",
         "content": prompt
@@ -185,17 +234,17 @@ Du bist ein professioneller Audi Verkaufsberater.
 
 Dein Ziel:
 - Kunden beraten
-- Fahrzeuge empfehlen
-- Premium Service bieten
-- verkaufsorientiert antworten
+- Premium Fahrzeuge empfehlen
+- Leads generieren
+- professionell verkaufen
 
 Regeln:
 - freundlich
 - modern
-- professionell
+- verkaufsorientiert
 - stelle Rückfragen
 - empfehle passende Audi Modelle
-- antworte klar und hilfreich
+- antworte professionell
 
 Kunde:
 {prompt}
@@ -214,3 +263,27 @@ Kunde:
         "role": "assistant",
         "content": answer
     })
+
+# ==================================================
+# 📞 LEAD FORMULAR
+# ==================================================
+
+st.divider()
+
+st.subheader("📞 Probefahrt oder Beratung anfragen")
+
+with st.form("lead_form"):
+
+    name = st.text_input("Name")
+    email = st.text_input("E-Mail")
+    telefon = st.text_input("Telefon")
+    interesse = st.selectbox(
+        "Interessiertes Modell",
+        ["Audi RS6", "Audi Q8", "Audi A5"]
+    )
+
+    senden = st.form_submit_button("Anfrage senden")
+
+    if senden:
+        st.success("✅ Anfrage erfolgreich gesendet!")
+        st.write(f"Vielen Dank {name}, wir melden uns schnellstmöglich.")
