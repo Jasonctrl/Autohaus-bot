@@ -1,6 +1,8 @@
 import streamlit as st
 import os
 import time
+import csv
+from datetime import datetime
 from dotenv import load_dotenv
 import google.generativeai as genai
 
@@ -154,7 +156,7 @@ with col1:
 
 with col2:
     st.image(
-        "https://images.unsplash.com/photo-1767749995462-9fe0890d5960?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7",
         use_container_width=True
     )
     st.markdown("### Audi Q8")
@@ -277,6 +279,7 @@ with st.form("lead_form"):
     name = st.text_input("Name")
     email = st.text_input("E-Mail")
     telefon = st.text_input("Telefon")
+
     interesse = st.selectbox(
         "Interessiertes Modell",
         ["Audi RS6", "Audi Q8", "Audi A5"]
@@ -284,6 +287,33 @@ with st.form("lead_form"):
 
     senden = st.form_submit_button("Anfrage senden")
 
+    # ==================================================
+    # 💾 LEADS SPEICHERN
+    # ==================================================
+
     if senden:
-        st.success("✅ Anfrage erfolgreich gesendet!")
-        st.write(f"Vielen Dank {name}, wir melden uns schnellstmöglich.")
+
+        # Zeit speichern
+        zeit = datetime.now().strftime("%d.%m.%Y %H:%M")
+
+        # Daten sammeln
+        daten = [
+            zeit,
+            name,
+            email,
+            telefon,
+            interesse
+        ]
+
+        # CSV Datei speichern
+        with open("leads.csv", "a", newline="", encoding="utf-8") as file:
+
+            writer = csv.writer(file)
+
+            writer.writerow(daten)
+
+        st.success("✅ Anfrage erfolgreich gespeichert!")
+
+        st.write(
+            f"Vielen Dank {name}, wir melden uns schnellstmöglich."
+        )
