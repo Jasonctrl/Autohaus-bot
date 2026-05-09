@@ -316,4 +316,24 @@ with st.form("lead_form"):
 
         st.write(
             f"Vielen Dank {name}, wir melden uns schnellstmöglich."
+        )# ==================================================
+# 📥 CSV DOWNLOAD
+# ==================================================
+
+st.divider()
+
+st.subheader("📥 Lead Export")
+
+if os.path.exists("leads.csv"):
+
+    with open("leads.csv", "rb") as file:
+
+        st.download_button(
+            label="📥 Leads herunterladen",
+            data=file,
+            file_name="leads.csv",
+            mime="text/csv"
         )
+
+else:
+    st.info("Noch keine Leads vorhanden.")
