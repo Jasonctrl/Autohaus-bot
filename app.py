@@ -2,7 +2,9 @@ import streamlit as st
 import os
 import time
 import csv
+import smtplib
 from datetime import datetime
+from email.mime.text import MIMEText
 from dotenv import load_dotenv
 import google.generativeai as genai
 
@@ -71,11 +73,6 @@ h1, h2, h3 {
     border-radius: 10px !important;
 }
 
-/* Info Box */
-[data-testid="stAlert"] {
-    border-radius: 12px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -127,7 +124,7 @@ st.markdown("""
 """)
 
 # ==================================================
-# 🚗 PREMIUM AUTO BILD
+# 🚗 PREMIUM BILD
 # ==================================================
 
 st.image(
@@ -151,7 +148,6 @@ with col1:
     st.markdown("### Audi RS6")
     st.write("💰 Ab 129.000 €")
     st.write("✔ 600 PS")
-    st.write("✔ Quattro")
     st.button("Probefahrt RS6")
 
 with col2:
@@ -162,7 +158,6 @@ with col2:
     st.markdown("### Audi Q8")
     st.write("💰 Ab 89.000 €")
     st.write("✔ Luxus SUV")
-    st.write("✔ Hybrid Technologie")
     st.button("Probefahrt Q8")
 
 with col3:
@@ -172,12 +167,11 @@ with col3:
     )
     st.markdown("### Audi A5")
     st.write("💰 Ab 58.000 €")
-    st.write("✔ Sportlich")
     st.write("✔ Premium Komfort")
     st.button("Probefahrt A5")
 
 # ==================================================
-# 💬 CHAT VERLAUF
+# 💬 CHAT SYSTEM
 # ==================================================
 
 if "messages" not in st.session_state:
@@ -195,7 +189,7 @@ if "last_time" not in st.session_state:
     st.session_state.last_time = 0
 
 # ==================================================
-# 💬 CHAT INPUT
+# 💬 USER INPUT
 # ==================================================
 
 prompt = st.chat_input("Wie kann ich Ihnen helfen?")
@@ -204,14 +198,12 @@ if prompt:
 
     current_time = time.time()
 
-    # Spam Schutz
     if current_time - st.session_state.last_time < 5:
         st.warning("⏳ Bitte kurz warten...")
         st.stop()
 
     st.session_state.last_time = current_time
 
-    # User Nachricht speichern
     st.session_state.messages.append({
         "role": "user",
         "content": prompt
@@ -219,10 +211,6 @@ if prompt:
 
     with st.chat_message("user"):
         st.markdown(prompt)
-
-    # ==================================================
-    # 🤖 KI ANTWORT
-    # ==================================================
 
     with st.chat_message("assistant"):
 
@@ -234,19 +222,12 @@ if prompt:
                     f"""
 Du bist ein professioneller Audi Verkaufsberater.
 
-Dein Ziel:
-- Kunden beraten
-- Premium Fahrzeuge empfehlen
-- Leads generieren
-- professionell verkaufen
-
 Regeln:
 - freundlich
-- modern
+- professionell
 - verkaufsorientiert
 - stelle Rückfragen
-- empfehle passende Audi Modelle
-- antworte professionell
+- empfehle Audi Modelle
 
 Kunde:
 {prompt}
@@ -256,11 +237,10 @@ Kunde:
                 answer = response.text
 
             except Exception:
-                answer = "⏳ Zu viele Anfragen. Bitte kurz warten und erneut versuchen."
+                answer = "⏳ Zu viele Anfragen. Bitte kurz warten."
 
         st.markdown(answer)
 
-    # Antwort speichern
     st.session_state.messages.append({
         "role": "assistant",
         "content": answer
@@ -288,15 +268,13 @@ with st.form("lead_form"):
     senden = st.form_submit_button("Anfrage senden")
 
     # ==================================================
-    # 💾 LEADS SPEICHERN
+    # 💾 LEAD SPEICHERN
     # ==================================================
 
     if senden:
 
-        # Zeit speichern
         zeit = datetime.now().strftime("%d.%m.%Y %H:%M")
 
-        # Daten sammeln
         daten = [
             zeit,
             name,
@@ -305,18 +283,61 @@ with st.form("lead_form"):
             interesse
         ]
 
-        # CSV Datei speichern
         with open("leads.csv", "a", newline="", encoding="utf-8") as file:
 
             writer = csv.writer(file)
 
             writer.writerow(daten)
 
+        # ==================================================
+        # 📧 EMAIL SENDEN
+        # ==================================================
+
+        try:
+
+            absender = "pjasondwayne@gmail.com"
+            passwort = "bdrn hycs xmtm bita"
+
+            empfaenger = "pjasondwayne@gmail.com"
+
+            nachricht = f"""
+🚗 Neuer Lead eingegangen
+
+Name: {name}
+E-Mail: {email}
+Telefon: {telefon}
+Fahrzeug: {interesse}
+
+Zeit:
+{zeit}
+"""
+
+            msg = MIMEText(nachricht)
+
+            msg["Subject"] = "🚗 Neuer Autohaus Lead"
+            msg["From"] = absender
+            msg["To"] = empfaenger
+
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+
+            server.starttls()
+
+            server.login(absender, passwort)
+
+            server.send_message(msg)
+
+            server.quit()
+
+        except Exception:
+            st.error("❌ E-Mail konnte nicht gesendet werden.")
+
         st.success("✅ Anfrage erfolgreich gespeichert!")
 
         st.write(
             f"Vielen Dank {name}, wir melden uns schnellstmöglich."
-        )# ==================================================
+        )
+
+# ==================================================
 # 📥 CSV DOWNLOAD
 # ==================================================
 
