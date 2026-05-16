@@ -3,6 +3,7 @@ import os
 import time
 import csv
 import smtplib
+import pandas as pd
 from datetime import datetime
 from email.mime.text import MIMEText
 from dotenv import load_dotenv
@@ -19,7 +20,7 @@ st.set_page_config(
 )
 
 # ==================================================
-# 🎨 AUDI PREMIUM DESIGN
+# 🎨 PREMIUM DESIGN
 # ==================================================
 
 st.markdown("""
@@ -50,12 +51,11 @@ h1, h2, h3 {
     border: none;
     padding: 12px 20px;
     font-weight: bold;
-    transition: 0.3s;
 }
 
+/* Hover */
 .stButton>button:hover {
     background-color: #ef233c;
-    transform: scale(1.02);
 }
 
 /* Chat Nachrichten */
@@ -66,7 +66,7 @@ h1, h2, h3 {
     margin-bottom: 10px;
 }
 
-/* Chat Input */
+/* Input */
 .stChatInput input {
     background-color: #1f2937 !important;
     color: white !important;
@@ -89,7 +89,7 @@ if not api_key:
     st.stop()
 
 # ==================================================
-# 🤖 GEMINI KONFIGURATION
+# 🤖 GEMINI
 # ==================================================
 
 genai.configure(api_key=api_key)
@@ -106,9 +106,9 @@ st.sidebar.info("""
 Willkommen beim digitalen Audi Verkaufsassistenten.
 
 ✔ KI Beratung  
-✔ Premium Fahrzeug-Empfehlungen  
-✔ Lead-Generierung  
-✔ Verkaufsunterstützung  
+✔ Premium Fahrzeuge  
+✔ Lead Generierung  
+✔ CRM Dashboard  
 """)
 
 st.sidebar.success("✅ System Online")
@@ -124,7 +124,7 @@ st.markdown("""
 """)
 
 # ==================================================
-# 🚗 PREMIUM BILD
+# 🚗 HERO IMAGE
 # ==================================================
 
 st.image(
@@ -133,7 +133,7 @@ st.image(
 )
 
 # ==================================================
-# 🚘 FAHRZEUGKARTEN
+# 🚘 FAHRZEUGE
 # ==================================================
 
 st.subheader("🔥 Beliebte Premium Modelle")
@@ -148,7 +148,7 @@ with col1:
     st.markdown("### Audi RS6")
     st.write("💰 Ab 129.000 €")
     st.write("✔ 600 PS")
-    st.button("Probefahrt RS6")
+    st.write("✔ Quattro")
 
 with col2:
     st.image(
@@ -158,7 +158,7 @@ with col2:
     st.markdown("### Audi Q8")
     st.write("💰 Ab 89.000 €")
     st.write("✔ Luxus SUV")
-    st.button("Probefahrt Q8")
+    st.write("✔ Hybrid")
 
 with col3:
     st.image(
@@ -168,7 +168,6 @@ with col3:
     st.markdown("### Audi A5")
     st.write("💰 Ab 58.000 €")
     st.write("✔ Premium Komfort")
-    st.button("Probefahrt A5")
 
 # ==================================================
 # 💬 CHAT SYSTEM
@@ -182,14 +181,14 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # ==================================================
-# ⏳ ANTI SPAM
+# ⏳ RATE LIMIT
 # ==================================================
 
 if "last_time" not in st.session_state:
     st.session_state.last_time = 0
 
 # ==================================================
-# 💬 USER INPUT
+# 💬 CHAT INPUT
 # ==================================================
 
 prompt = st.chat_input("Wie kann ich Ihnen helfen?")
@@ -226,8 +225,8 @@ Regeln:
 - freundlich
 - professionell
 - verkaufsorientiert
+- empfehle passende Fahrzeuge
 - stelle Rückfragen
-- empfehle Audi Modelle
 
 Kunde:
 {prompt}
@@ -237,7 +236,7 @@ Kunde:
                 answer = response.text
 
             except Exception:
-                answer = "⏳ Zu viele Anfragen. Bitte kurz warten."
+                answer = "⏳ Zu viele Anfragen. Bitte später erneut versuchen."
 
         st.markdown(answer)
 
@@ -267,10 +266,6 @@ with st.form("lead_form"):
 
     senden = st.form_submit_button("Anfrage senden")
 
-    # ==================================================
-    # 💾 LEAD SPEICHERN
-    # ==================================================
-
     if senden:
 
         zeit = datetime.now().strftime("%d.%m.%Y %H:%M")
@@ -282,6 +277,10 @@ with st.form("lead_form"):
             telefon,
             interesse
         ]
+
+        # ==================================================
+        # 💾 CSV SPEICHERN
+        # ==================================================
 
         with open("leads.csv", "a", newline="", encoding="utf-8") as file:
 
@@ -295,10 +294,10 @@ with st.form("lead_form"):
 
         try:
 
-            absender = "pjasondwayne@gmail.com"
-            passwort = "bdrn hycs xmtm bita"
+            absender = "DEINE_GMAIL@gmail.com"
+            passwort = "DEIN_APP_PASSWORT"
 
-            empfaenger = "pjasondwayne@gmail.com"
+            empfaenger = "DEINE_GMAIL@gmail.com"
 
             nachricht = f"""
 🚗 Neuer Lead eingegangen
@@ -356,5 +355,78 @@ if os.path.exists("leads.csv"):
             mime="text/csv"
         )
 
+# ==================================================
+# 📊 CRM DASHBOARD
+# ==================================================
+
+st.divider()
+
+st.header("📊 CRM Dashboard")
+
+if os.path.exists("leads.csv"):
+
+    df = pd.read_csv(
+        "leads.csv",
+        header=None,
+        names=[
+            "Datum",
+            "Name",
+            "E-Mail",
+            "Telefon",
+            "Fahrzeug"
+        ]
+    )
+
+    # ==================================================
+    # 📈 STATISTIKEN
+    # ==================================================
+
+    st.subheader("📈 Statistiken")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            "Gesamte Leads",
+            len(df)
+        )
+
+    with col2:
+        st.metric(
+            "Beliebtestes Fahrzeug",
+            df["Fahrzeug"].mode()[0]
+        )
+
+    # ==================================================
+    # 🔍 SUCHE
+    # ==================================================
+
+    st.subheader("🔍 Lead Suche")
+
+    suche = st.text_input(
+        "Nach Name oder Fahrzeug suchen"
+    )
+
+    if suche:
+
+        gefiltert = df[
+            df["Name"].str.contains(suche, case=False)
+            |
+            df["Fahrzeug"].str.contains(suche, case=False)
+        ]
+
+        st.dataframe(
+            gefiltert,
+            use_container_width=True
+        )
+
+    else:
+
+        st.dataframe(
+            df,
+            use_container_width=True
+        )
+
 else:
+
     st.info("Noch keine Leads vorhanden.")
