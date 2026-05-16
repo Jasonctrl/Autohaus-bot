@@ -91,10 +91,12 @@ authenticator = stauth.Authenticate(
     "abcdef",
     cookie_expiry_days=30
 )
-
-name, authentication_status, username = authenticator.login(
+authentication_status = authenticator.login(
     location="main"
 )
+
+if authentication_status:
+    name = "Admin"
 
 if authentication_status is False:
     st.error("❌ Benutzername oder Passwort falsch")
