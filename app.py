@@ -23,30 +23,25 @@ st.set_page_config(
 )
 
 # ==================================================
-# 🎨 PREMIUM DESIGN
+# 🎨 DESIGN
 # ==================================================
 
 st.markdown("""
 <style>
 
-/* Hintergrund */
 .stApp {
     background-color: #0e1117;
     color: white;
 }
 
-/* Sidebar */
 section[data-testid="stSidebar"] {
     background-color: #111827;
-    border-right: 1px solid #222;
 }
 
-/* Überschriften */
 h1, h2, h3 {
     color: white;
 }
 
-/* Buttons */
 .stButton>button {
     background-color: #d90429;
     color: white;
@@ -56,12 +51,10 @@ h1, h2, h3 {
     font-weight: bold;
 }
 
-/* Hover */
 .stButton>button:hover {
     background-color: #ef233c;
 }
 
-/* Chat Nachrichten */
 [data-testid="stChatMessage"] {
     background-color: #1f2937;
     border-radius: 15px;
@@ -69,7 +62,6 @@ h1, h2, h3 {
     margin-bottom: 10px;
 }
 
-/* Inputs */
 .stTextInput input,
 .stChatInput input {
     background-color: #1f2937 !important;
@@ -84,22 +76,17 @@ h1, h2, h3 {
 # 🔐 LOGIN SYSTEM
 # ==================================================
 
-names = ["Admin"]
-usernames = ["admin"]
-
-passwords = ["admin123"]
-
-hashed_passwords = stauth.Hasher(passwords).generate()
+credentials = {
+    "usernames": {
+        "admin": {
+            "name": "Admin",
+            "password": "$2b$12$KIXQ0KXJ6t7lP6R7LQ5M6uT3J4bLQ7m6x3F8f9V5l9M4nB2d7H9aK"
+        }
+    }
+}
 
 authenticator = stauth.Authenticate(
-    {
-        "usernames": {
-            usernames[0]: {
-                "name": names[0],
-                "password": hashed_passwords[0]
-            }
-        }
-    },
+    credentials,
     "audi_dashboard",
     "abcdef",
     cookie_expiry_days=30
@@ -112,258 +99,250 @@ name, authentication_status, username = authenticator.login(
 
 if authentication_status is False:
     st.error("❌ Benutzername oder Passwort falsch")
+    st.stop()
 
 if authentication_status is None:
     st.warning("🔐 Bitte anmelden")
+    st.stop()
+
+authenticator.logout("Logout", "sidebar")
+
+st.sidebar.success(f"Willkommen {name}")
 
 # ==================================================
-# 🚀 APP START
+# 🔐 API KEY
 # ==================================================
 
-if authentication_status:
+load_dotenv()
 
-    authenticator.logout("Logout", "sidebar")
+api_key = os.getenv("GOOGLE_API_KEY")
 
-    st.sidebar.success(f"Willkommen {name}")
+if not api_key:
+    st.error("❌ GOOGLE_API_KEY fehlt")
+    st.stop()
 
-    # ==================================================
-    # 🔐 API KEY LADEN
-    # ==================================================
+# ==================================================
+# 🤖 GEMINI
+# ==================================================
 
-    load_dotenv()
+genai.configure(api_key=api_key)
 
-    api_key = os.getenv("GOOGLE_API_KEY")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
-    if not api_key:
-        st.error("❌ Kein API Key gefunden!")
-        st.stop()
+# ==================================================
+# 🚘 SIDEBAR
+# ==================================================
 
-    # ==================================================
-    # 🤖 GEMINI
-    # ==================================================
+st.sidebar.title("🚘 Audi Dashboard")
 
-    genai.configure(api_key=api_key)
-
-    model = genai.GenerativeModel("gemini-2.5-flash")
-
-    # ==================================================
-    # 🚘 SIDEBAR
-    # ==================================================
-
-    st.sidebar.title("🚘 Audi Dashboard")
-
-    st.sidebar.info("""
+st.sidebar.info("""
 Willkommen beim digitalen Audi Verkaufsassistenten.
 
 ✔ KI Beratung  
 ✔ Premium Fahrzeuge  
 ✔ Lead Generierung  
 ✔ CRM Dashboard  
-✔ Login System
+✔ Login System  
 """)
 
-    st.sidebar.success("✅ System Online")
+st.sidebar.success("✅ System Online")
 
-    # ==================================================
-    # 🚗 TITEL
-    # ==================================================
+# ==================================================
+# 🚗 TITEL
+# ==================================================
 
-    st.markdown("""
+st.markdown("""
 # 🚗 Audi KI Verkaufsassistent
 
 ### Premium Beratung für moderne Mobilität
 """)
 
-    # ==================================================
-    # 🚗 HERO IMAGE
-    # ==================================================
+# ==================================================
+# 🚗 HERO IMAGE
+# ==================================================
+
+st.image(
+    "https://images.unsplash.com/photo-1503376780353-7e6692767b70",
+    use_container_width=True
+)
+
+# ==================================================
+# 🚘 FAHRZEUGE
+# ==================================================
+
+st.subheader("🔥 Beliebte Premium Modelle")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
 
     st.image(
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70",
+        "https://images.unsplash.com/photo-1553440569-bcc63803a83d",
         use_container_width=True
     )
 
-    # ==================================================
-    # 🚘 FAHRZEUGE
-    # ==================================================
+    st.markdown("### Audi RS6")
+    st.write("💰 Ab 129.000 €")
+    st.write("✔ 600 PS")
+    st.write("✔ Quattro")
 
-    st.subheader("🔥 Beliebte Premium Modelle")
+with col2:
 
-    col1, col2, col3 = st.columns(3)
+    st.image(
+        "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7",
+        use_container_width=True
+    )
 
-    with col1:
+    st.markdown("### Audi Q8")
+    st.write("💰 Ab 89.000 €")
+    st.write("✔ Luxus SUV")
+    st.write("✔ Hybrid")
 
-        st.image(
-            "https://images.unsplash.com/photo-1553440569-bcc63803a83d",
-            use_container_width=True
-        )
+with col3:
 
-        st.markdown("### Audi RS6")
-        st.write("💰 Ab 129.000 €")
-        st.write("✔ 600 PS")
-        st.write("✔ Quattro")
+    st.image(
+        "https://images.unsplash.com/photo-1502877338535-766e1452684a",
+        use_container_width=True
+    )
 
-    with col2:
+    st.markdown("### Audi A5")
+    st.write("💰 Ab 58.000 €")
+    st.write("✔ Premium Komfort")
 
-        st.image(
-            "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7",
-            use_container_width=True
-        )
+# ==================================================
+# 💬 CHAT
+# ==================================================
 
-        st.markdown("### Audi Q8")
-        st.write("💰 Ab 89.000 €")
-        st.write("✔ Luxus SUV")
-        st.write("✔ Hybrid")
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-    with col3:
+for msg in st.session_state.messages:
 
-        st.image(
-            "https://images.unsplash.com/photo-1502877338535-766e1452684a",
-            use_container_width=True
-        )
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-        st.markdown("### Audi A5")
-        st.write("💰 Ab 58.000 €")
-        st.write("✔ Premium Komfort")
+# ==================================================
+# ⏳ SPAM SCHUTZ
+# ==================================================
 
-    # ==================================================
-    # 💬 CHAT SYSTEM
-    # ==================================================
+if "last_time" not in st.session_state:
+    st.session_state.last_time = 0
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+# ==================================================
+# 💬 INPUT
+# ==================================================
 
-    for msg in st.session_state.messages:
+prompt = st.chat_input("Wie kann ich Ihnen helfen?")
 
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+if prompt:
 
-    # ==================================================
-    # ⏳ ANTI SPAM
-    # ==================================================
+    current_time = time.time()
 
-    if "last_time" not in st.session_state:
-        st.session_state.last_time = 0
+    if current_time - st.session_state.last_time < 5:
+        st.warning("⏳ Bitte kurz warten...")
+        st.stop()
 
-    # ==================================================
-    # 💬 CHAT INPUT
-    # ==================================================
+    st.session_state.last_time = current_time
 
-    prompt = st.chat_input("Wie kann ich Ihnen helfen?")
+    st.session_state.messages.append({
+        "role": "user",
+        "content": prompt
+    })
 
-    if prompt:
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-        current_time = time.time()
+    with st.chat_message("assistant"):
 
-        if current_time - st.session_state.last_time < 5:
-            st.warning("⏳ Bitte kurz warten...")
-            st.stop()
+        with st.spinner("🚗 Audi KI denkt nach..."):
 
-        st.session_state.last_time = current_time
+            try:
 
-        st.session_state.messages.append({
-            "role": "user",
-            "content": prompt
-        })
-
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        with st.chat_message("assistant"):
-
-            with st.spinner("🚗 Audi KI denkt nach..."):
-
-                try:
-
-                    response = model.generate_content(
-                        f"""
+                response = model.generate_content(
+                    f"""
 Du bist ein professioneller Audi Verkaufsberater.
 
 Regeln:
 - freundlich
 - professionell
 - verkaufsorientiert
-- empfehle passende Fahrzeuge
 - stelle Rückfragen
+- empfehle passende Audi Modelle
 
 Kunde:
 {prompt}
 """
-                    )
+                )
 
-                    answer = response.text
+                answer = response.text
 
-                except Exception:
-                    answer = "⏳ Zu viele Anfragen. Bitte später erneut versuchen."
+            except Exception:
+                answer = "⏳ Zu viele Anfragen. Bitte später erneut versuchen."
 
-            st.markdown(answer)
+        st.markdown(answer)
 
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": answer
-        })
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": answer
+    })
 
-    # ==================================================
-    # 📞 LEAD FORMULAR
-    # ==================================================
+# ==================================================
+# 📞 LEAD FORMULAR
+# ==================================================
 
-    st.divider()
+st.divider()
 
-    st.subheader("📞 Probefahrt oder Beratung anfragen")
+st.subheader("📞 Probefahrt oder Beratung anfragen")
 
-    with st.form("lead_form"):
+with st.form("lead_form"):
 
-        name_input = st.text_input("Name")
-        email = st.text_input("E-Mail")
-        telefon = st.text_input("Telefon")
+    name_input = st.text_input("Name")
+    email = st.text_input("E-Mail")
+    telefon = st.text_input("Telefon")
 
-        interesse = st.selectbox(
-            "Interessiertes Modell",
-            ["Audi RS6", "Audi Q8", "Audi A5"]
-        )
+    interesse = st.selectbox(
+        "Interessiertes Modell",
+        ["Audi RS6", "Audi Q8", "Audi A5"]
+    )
 
-        senden = st.form_submit_button("Anfrage senden")
+    senden = st.form_submit_button("Anfrage senden")
 
-        if senden:
+    if senden:
 
-            zeit = datetime.now().strftime("%d.%m.%Y %H:%M")
+        zeit = datetime.now().strftime("%d.%m.%Y %H:%M")
 
-            daten = [
-                zeit,
-                name_input,
-                email,
-                telefon,
-                interesse
-            ]
+        daten = [
+            zeit,
+            name_input,
+            email,
+            telefon,
+            interesse
+        ]
 
-            # ==================================================
-            # 💾 CSV SPEICHERN
-            # ==================================================
+        with open(
+            "leads.csv",
+            "a",
+            newline="",
+            encoding="utf-8"
+        ) as file:
 
-            with open(
-                "leads.csv",
-                "a",
-                newline="",
-                encoding="utf-8"
-            ) as file:
+            writer = csv.writer(file)
 
-                writer = csv.writer(file)
+            writer.writerow(daten)
 
-                writer.writerow(daten)
+        # ==================================================
+        # 📧 EMAIL SENDEN
+        # ==================================================
 
-            # ==================================================
-            # 📧 EMAIL SENDEN
-            # ==================================================
+        try:
 
-            try:
+            absender = "Pjasondwayne@gmail.com"
+            passwort = "bdrn hycs xmtm bita"
 
-                absender = "DEINE_GMAIL@gmail.com"
-                passwort = "DEIN_APP_PASSWORT"
+            empfaenger = "Pjasondwayne@gmail.com"
 
-                empfaenger = "DEINE_GMAIL@gmail.com"
-
-                nachricht = f"""
-🚗 Neuer Lead eingegangen
+            nachricht = f"""
+🚗 Neuer Lead
 
 Name: {name_input}
 E-Mail: {email}
@@ -374,136 +353,124 @@ Zeit:
 {zeit}
 """
 
-                msg = MIMEText(nachricht)
+            msg = MIMEText(nachricht)
 
-                msg["Subject"] = "🚗 Neuer Autohaus Lead"
-                msg["From"] = absender
-                msg["To"] = empfaenger
+            msg["Subject"] = "🚗 Neuer Autohaus Lead"
+            msg["From"] = absender
+            msg["To"] = empfaenger
 
-                server = smtplib.SMTP(
-                    "smtp.gmail.com",
-                    587
-                )
-
-                server.starttls()
-
-                server.login(
-                    absender,
-                    passwort
-                )
-
-                server.send_message(msg)
-
-                server.quit()
-
-            except Exception:
-                st.error("❌ E-Mail konnte nicht gesendet werden.")
-
-            st.success("✅ Anfrage erfolgreich gespeichert!")
-
-            st.write(
-                f"Vielen Dank {name_input}, wir melden uns schnellstmöglich."
+            server = smtplib.SMTP(
+                "smtp.gmail.com",
+                587
             )
 
-    # ==================================================
-    # 📥 CSV DOWNLOAD
-    # ==================================================
+            server.starttls()
 
-    st.divider()
-
-    st.subheader("📥 Lead Export")
-
-    if os.path.exists("leads.csv"):
-
-        with open("leads.csv", "rb") as file:
-
-            st.download_button(
-                label="📥 Leads herunterladen",
-                data=file,
-                file_name="leads.csv",
-                mime="text/csv"
+            server.login(
+                absender,
+                passwort
             )
 
-    # ==================================================
-    # 📊 CRM DASHBOARD
-    # ==================================================
+            server.send_message(msg)
 
-    st.divider()
+            server.quit()
 
-    st.header("📊 CRM Dashboard")
+        except Exception:
+            st.error("❌ E-Mail konnte nicht gesendet werden.")
 
-    if os.path.exists("leads.csv"):
+        st.success("✅ Anfrage gespeichert!")
 
-        df = pd.read_csv(
-            "leads.csv",
-            header=None,
-            names=[
-                "Datum",
-                "Name",
-                "E-Mail",
-                "Telefon",
-                "Fahrzeug"
-            ]
+# ==================================================
+# 📥 CSV DOWNLOAD
+# ==================================================
+
+st.divider()
+
+st.subheader("📥 Lead Export")
+
+if os.path.exists("leads.csv"):
+
+    with open("leads.csv", "rb") as file:
+
+        st.download_button(
+            label="📥 Leads herunterladen",
+            data=file,
+            file_name="leads.csv",
+            mime="text/csv"
         )
 
-        # ==================================================
-        # 📈 STATISTIKEN
-        # ==================================================
+# ==================================================
+# 📊 CRM DASHBOARD
+# ==================================================
 
-        st.subheader("📈 Statistiken")
+st.divider()
 
-        col1, col2 = st.columns(2)
+st.header("📊 CRM Dashboard")
 
-        with col1:
+if os.path.exists("leads.csv"):
 
-            st.metric(
-                "Gesamte Leads",
-                len(df)
-            )
+    df = pd.read_csv(
+        "leads.csv",
+        header=None,
+        names=[
+            "Datum",
+            "Name",
+            "E-Mail",
+            "Telefon",
+            "Fahrzeug"
+        ]
+    )
 
-        with col2:
+    st.subheader("📈 Statistiken")
 
-            st.metric(
-                "Beliebtestes Fahrzeug",
-                df["Fahrzeug"].mode()[0]
-            )
+    col1, col2 = st.columns(2)
 
-        # ==================================================
-        # 🔍 SUCHE
-        # ==================================================
+    with col1:
 
-        st.subheader("🔍 Lead Suche")
-
-        suche = st.text_input(
-            "Nach Name oder Fahrzeug suchen"
+        st.metric(
+            "Gesamte Leads",
+            len(df)
         )
 
-        if suche:
+    with col2:
 
-            gefiltert = df[
-                df["Name"].str.contains(
-                    suche,
-                    case=False
-                )
-                |
-                df["Fahrzeug"].str.contains(
-                    suche,
-                    case=False
-                )
-            ]
+        st.metric(
+            "Beliebtestes Fahrzeug",
+            df["Fahrzeug"].mode()[0]
+        )
 
-            st.dataframe(
-                gefiltert,
-                use_container_width=True
+    st.subheader("🔍 Lead Suche")
+
+    suche = st.text_input(
+        "Nach Name oder Fahrzeug suchen"
+    )
+
+    if suche:
+
+        gefiltert = df[
+            df["Name"].str.contains(
+                suche,
+                case=False
             )
-
-        else:
-
-            st.dataframe(
-                df,
-                use_container_width=True
+            |
+            df["Fahrzeug"].str.contains(
+                suche,
+                case=False
             )
+        ]
+
+        st.dataframe(
+            gefiltert,
+            use_container_width=True
+        )
 
     else:
 
-        st.info("Noch keine Leads vorhanden.")
+        st.dataframe(
+            df,
+            use_container_width=True
+        )
+
+else:
+
+    st.info("Noch keine Leads vorhanden.")
